@@ -1,0 +1,13 @@
+# environment variables
+.env
+
+# virtual environment
+venv/*
+
+# pycache
+**/__pycache__/
+
+# AI data
+data/*
+models/*
+outputs/*
