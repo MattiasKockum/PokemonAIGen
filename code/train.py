@@ -17,6 +17,7 @@ from torch.utils.data import DataLoader
 
 from model import Net
 from dataset import PokemonSprites
+from utils import add_variable_gaussian_noise
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -31,11 +32,14 @@ def train(args):
     if use_cuda:
         torch.cuda.manual_seed(args.seed)
 
-    train_loader = DataLoader(PokemonSprites(args.train), batch_size=args.batch_size, shuffle=True)
-    test_loader = DataLoader(PokemonSprites(args.test), batch_size=args.test_batch_size, shuffle=False)
+    train_set = PokemonSprites(args.train)
+    test_set = PokemonSprites(args.test)
 
-    net = Net().to(device)
-    loss_fn = nn.CrossEntropyLoss()
+    train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True)
+    test_loader = DataLoader(test_set, batch_size=args.test_batch_size, shuffle=False)
+
+    net = Net(train_set.images_size, 1, args.noise).to(device)
+    loss_fn = nn.MSELoss()
     optimizer = optim.Adam(
         net.parameters(), betas=(args.beta_1, args.beta_2), weight_decay=args.weight_decay
     )
@@ -47,26 +51,29 @@ def train(args):
             "architecture": "ConvAutoEncoder",
             "dataset": "PokemonSprites",
             "epochs": args.epochs,
+            "noise": args.noise
             }
     )
 
     logger.info("Start training ...")
     for epoch in range(1, args.epochs + 1):
         net.train()
-        for batch_idx, (imgs, labels) in enumerate(train_loader, 1):
-            imgs, labels = imgs.to(device), labels.to(device)
-            output = net(imgs)
-            loss = loss_fn(output, labels)
+        for batch_idx, images in enumerate(train_loader, 1):
+            images = images.to(device)
+            noisy_images = add_variable_gaussian_noise(images, args.noise)
+            output = net(noisy_images)
+            loss = loss_fn(output, images)
 
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
+            print(batch_idx, args.log_interval, batch_idx % args.log_interval)
             if batch_idx % args.log_interval == 0:
-                log(loss, epoch, batch_idx, imgs, train_loader)
+                log(loss, epoch, batch_idx, images, train_loader)
 
         # test the model
-        test(net, test_loader, device)
+        test(net, test_loader, device, loss_fn, args)
 
     # save model checkpoint
     save_model(net, args.model_dir)
@@ -87,25 +94,21 @@ def log(loss, epoch, batch_idx, imgs, train_loader):
     )
 
 
-def test(model, test_loader, device):
+def test(model, test_loader, device, loss_fn, args):
     model.eval()
     test_loss = 0
-    correct = 0
     with torch.no_grad():
-        for imgs, labels in test_loader:
-            imgs, labels = imgs.to(device), labels.to(device)
-            output = model(imgs)
-            test_loss += F.cross_entropy(output, labels, reduction="sum").item()
+        for images in test_loader:
+            images = images.to(device)
+            noisy_images = add_variable_gaussian_noise(images, args.noise)
+            output = model(noisy_images)
+            test_loss += loss_fn(output, images).item()
 
-            pred = output.max(1, keepdim=True)[1]
-            correct += pred.eq(labels.view_as(pred)).sum().item()
 
     test_loss /= len(test_loader.dataset)
     wandb.log({"test": test_loss})
     logger.info(
-        "Test set: Average loss: {:.4f}, Accuracy: {}/{}, {})\n".format(
-            test_loss, correct, len(test_loader.dataset), 100.0 * correct / len(test_loader.dataset)
-        )
+        "Test set: Average loss: {:.4f}\n".format(test_loss)
     )
     return
 
@@ -136,7 +139,7 @@ def parse_args():
         help="input batch size for testing (default: 1000)",
     )
     parser.add_argument(
-        "--epochs", type=int, default=1, metavar="N", help="number of epochs to train (default: 1)"
+        "--epochs", type=int, default=1, metavar="n", help="number of epochs to train (default: 1)"
     )
     parser.add_argument(
         "--learning-rate",
@@ -144,6 +147,13 @@ def parse_args():
         default=0.001,
         metavar="LR",
         help="learning rate (default: 0.01)",
+    )
+    parser.add_argument(
+        "--noise",
+        type=float,
+        default=0.2,
+        metavar="no",
+        help="How much noise the model is trained to remove",
     )
     parser.add_argument(
         "--beta_1", type=float, default=0.9, metavar="BETA1", help="beta1 (default: 0.9)"

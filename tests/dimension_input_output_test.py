@@ -12,7 +12,7 @@ def test_output_size(image_size, channels):
     random_image = torch.randn((batch_size, channels, image_size[0], image_size[1]))
 
     # Instantiate the Net model
-    model = Net(image_size, channels)
+    model = Net(image_size, channels, 0.2)
 
     # Forward pass
     output = model(random_image)

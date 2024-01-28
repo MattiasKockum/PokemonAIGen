@@ -33,3 +33,6 @@ python deploy.py
 ```
 
 Look into outputs directory
+
+# TODO
+Data Augmentation

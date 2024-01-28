@@ -36,8 +36,12 @@ def convert_to_tensor(archive_path):
 
 
 class PokemonSprites(Dataset):
-    def __init__(self, archive_path):
-        self.images = convert_to_tensor(archive_path)
+    def __init__(self, archive_path, file_name="images.tar.gz"):
+        self.images = convert_to_tensor(f"{archive_path}/{file_name}")
+        if len(self.images.shape) == 3:
+            self.images = self.images.unsqueeze(1)
+        self.images_size = list(self.images.shape[2:])
+        self.channels = self.images.shape[1]
 
     def __len__(self):
         return len(self.images)

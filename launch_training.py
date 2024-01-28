@@ -34,9 +34,10 @@ estimator = PyTorch(
     volume_size=250,
     output_path=f"{output_path}/models",
     hyperparameters={
-        "batch-size": 128,
+        "batch-size": 16,
         "epochs": 3,
         "learning-rate": 1e-3,
+        "noise": 0.2,
         "log-interval": 10},
     environment={"WANDB_API_KEY": os.getenv("wandb_api_key")}
 )

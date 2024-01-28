@@ -1608,10 +1608,10 @@ image_3 = torch.tensor(image_3)
 image_4 = torch.tensor(image_4)
 
 @pytest.mark.parametrize("path, index, image", [
-    ("data/training/images.tar.gz", 0, image_1),
-    ("data/training/images.tar.gz", -1, image_2),
-    ("data/testing/images.tar.gz", 0, image_3),
-    ("data/testing/images.tar.gz", -1, image_4),
+    ("data/training", 0, image_1),
+    ("data/training", -1, image_2),
+    ("data/testing", 0, image_3),
+    ("data/testing", -1, image_4),
 ])
 def test_good_reading_of_images(path, index, image):
     dataset = PokemonSprites(path)

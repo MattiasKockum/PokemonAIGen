@@ -19,9 +19,10 @@ def input_fn(request_body, request_content_type):
     data = torch.tensor(data, dtype=torch.float32, device=device)
     return data
 
-def predict_fn(input_object, model):
+def predict_fn(model):
     with torch.no_grad():
-        prediction = model(input_object)
+        torch.rand
+        prediction = model()
     return prediction
 
 def output_fn(predictions, content_type):
