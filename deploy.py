@@ -49,10 +49,12 @@ predictor = model.deploy(
 # Calling
 
 
+res = []
 
 data = {"x": 56, "y": 56}
 
-res = predictor.predict(data)
+for i in range(10):
+    res.append(predictor.predict(data))
 
 
 # Shutting down
@@ -62,6 +64,16 @@ predictor.delete_endpoint()
 
 # Showing results
 
-img = res[0][0]
-plt.imshow(img)
-plt.show()
+if not os.path.exists("outputs"):
+    os.makedirs("outputs")
+
+save_path = f"outputs/{pt_mnist_model_data.split('/')[5]}"
+
+if not os.path.exists(save_path):
+    os.makedirs(save_path)
+
+for i, image in enumerate(res):
+    fig, axes = plt.subplots(1, 1)
+    axes.imshow(image[0][0])
+    fig.savefig(f"{save_path}/{i}.png")
+    fig.show()

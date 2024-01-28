@@ -2,7 +2,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class Net(nn.Module):
-    def __init__(self, image_size, channels, noise, num_heads=8, num_layers=6, embedding_dim=512):
+    def __init__(self, image_size, channels, noise, num_heads=32, num_layers=24, embedding_dim=512):
         super(Net, self).__init__()
         self.image_size = image_size
         self.channels = channels

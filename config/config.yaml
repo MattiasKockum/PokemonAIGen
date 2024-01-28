@@ -3,9 +3,9 @@ prefix: DEMO-Pokemon-Generator
 deploy-instance: ml.c5.xlarge
 learning-instance: ml.c5.xlarge
 
-epochs: 30
+epochs: 3000
 learning-rate: 0.001
 batch-size: 16
 log-interval: 1
 
-noise: 0.2
+noise: 0.05
