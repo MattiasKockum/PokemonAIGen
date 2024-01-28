@@ -62,7 +62,6 @@ predictor.delete_endpoint()
 
 # Showing results
 
-for img in res:
-    print(res)
-    #plt.imshow(img)
-    #plt.show()
+img = res[0][0]
+plt.imshow(img)
+plt.show()
