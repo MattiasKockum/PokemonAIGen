@@ -36,3 +36,9 @@ Look into outputs directory
 # TODO
 Data Augmentation
 Early stopping and checkpoints
+
+# Best results for now
+
+![Image 1](/results/1.png?raw=true "Image 1")
+![Image 2](/results/2.png?raw=true "Image 2")
+
