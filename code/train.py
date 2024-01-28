@@ -68,7 +68,6 @@ def train(args):
             loss.backward()
             optimizer.step()
 
-            print(batch_idx, args.log_interval, batch_idx % args.log_interval)
             if batch_idx % args.log_interval == 0:
                 log(loss, epoch, batch_idx, images, train_loader)
 

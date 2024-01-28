@@ -15,14 +15,16 @@ def model_fn(model_dir):
 
 def input_fn(request_body, request_content_type):
     assert request_content_type=='application/json'
-    data = json.loads(request_body)['inputs']
-    data = torch.tensor(data, dtype=torch.float32, device=device)
+    x = json.loads(request_body)['x']
+    y = json.loads(request_body)['y']
+    data = torch.rand((x, y))
     return data
 
-def predict_fn(model):
+def predict_fn(input_object, model):
     with torch.no_grad():
-        torch.rand
-        prediction = model()
+        prediction = input_object
+        for i in range(int(1 / model.noise)):
+            prediction = model(prediction)
     return prediction
 
 def output_fn(predictions, content_type):
