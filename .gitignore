@@ -7,6 +7,9 @@ venv/*
 # pycache
 **/__pycache__/
 
+# Some config
+config/save_last_model.yaml
+
 # AI data
 data/*
 models/*

@@ -1,1 +1,0 @@
-last-trained-model: s3://sagemaker-eu-west-3-008963100236/DEMO-Pokemon-Generator/models/pytorch-training-2024-01-28-06-56-12-211/output/model.tar.gz
