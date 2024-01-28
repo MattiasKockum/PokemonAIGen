@@ -1,5 +1,7 @@
-import torch
 import pytest
+
+import torch
+
 from code.model import Net
 
 
@@ -16,5 +18,5 @@ def test_output_size(image_size, channels):
     output = model(random_image)
 
     # Check if the output size matches the input size
-    assert output.size() == random_image.size(), "Output size does not match input size"
+    assert output.size() == random_image.size(), "Output size does not match input size."
 

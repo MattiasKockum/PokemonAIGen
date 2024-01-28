@@ -5,8 +5,8 @@
 ## How tu use it
 
 ``` bash
-git clone https://github.com/MattiasKockum/EndToEndMNISTwithAWS.git
-cd EndToEndMNISTwithAWS
+git clone https://github.com/MattiasKockum/PokemonAIGen.git
+cd PokemonAIGen
 python -m venv venv
 source venv/bin/activate
 #sudo mount -o remount,size=16G /tmp # This might be needed
