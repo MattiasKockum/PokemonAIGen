@@ -34,8 +34,16 @@ python deploy.py
 Look into outputs directory
 
 # TODO
+
+Save Model with model card
+
+Load more data from all three sources
+
 Data Augmentation
+
 Early stopping and checkpoints
+
+Regularization
 
 # Best results for now
 
