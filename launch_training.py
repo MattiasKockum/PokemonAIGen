@@ -42,7 +42,7 @@ estimator = PyTorch(
         "batch-size": config["batch-size"],
         "epochs": config["epochs"],
         "learning-rate": config["learning-rate"],
-        "noise": config["noise"],
+        "denoising-steps": config["denoising-steps"],
         "data-augmentation-factor": config["data-augmentation-factor"],
         "log-interval": config["log-interval"]},
     environment={"WANDB_API_KEY": os.getenv("wandb_api_key")}

@@ -38,7 +38,7 @@ def train(args):
     train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True)
     test_loader = DataLoader(test_set, batch_size=args.test_batch_size, shuffle=False)
 
-    net = Net(train_set.images_size, 1, args.noise).to(device)
+    net = Net(train_set.images_size, 1, args.denoising_steps).to(device)
     loss_fn = nn.MSELoss()
     optimizer = optim.Adam(
         net.parameters(), betas=(args.beta_1, args.beta_2), weight_decay=args.weight_decay
@@ -51,7 +51,7 @@ def train(args):
             "architecture": "ConvAutoEncoder",
             "dataset": "PokemonSprites",
             "epochs": args.epochs,
-            "noise": args.noise,
+            "denoising-steps": args.denoising_steps,
             "data_augmentation_factor": args.data_augmentation_factor
             }
     )
@@ -62,7 +62,7 @@ def train(args):
         for batch_idx, images in enumerate(train_loader, 1):
             images = images.to(device)
             images = augment_data(images, args.data_augmentation_factor)
-            noisy_images = add_variable_gaussian_noise(images, args.noise)
+            noisy_images = add_variable_gaussian_noise(images, 1 / args.denoising_steps)
             output = net(noisy_images)
             loss = loss_fn(output, images)
 
@@ -101,7 +101,7 @@ def test(model, test_loader, device, loss_fn, args):
     with torch.no_grad():
         for images in test_loader:
             images = images.to(device)
-            noisy_images = add_variable_gaussian_noise(images, args.noise)
+            noisy_images = add_variable_gaussian_noise(images, 1 / args.denoising_steps)
             output = model(noisy_images)
             test_loss += loss_fn(output, images).item()
 
@@ -157,11 +157,11 @@ def parse_args():
         help="How much the images are stretch during data augmentation",
     )
     parser.add_argument(
-        "--noise",
+        "--denoising-steps",
         type=float,
         default=0.2,
         metavar="no",
-        help="How much noise the model is trained to remove",
+        help="How much denoising steps the model is trained to do",
     )
     parser.add_argument(
         "--beta_1", type=float, default=0.9, metavar="BETA1", help="beta1 (default: 0.9)"

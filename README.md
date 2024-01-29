@@ -45,11 +45,11 @@ Look into outputs directory
 
 # TODO
 
-Save Model with model card
-
 Add images of diffusion into WandB
 
 Load more data from all three sources
+
+Save Model with model card
 
 Early stopping and checkpoints
 
