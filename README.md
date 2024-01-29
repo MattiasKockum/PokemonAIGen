@@ -61,7 +61,7 @@ Add possiblity to launch training and quit, leaving the model training online
 
 Here are exemples of data augmentation done to ensure better robustness of the model.
 
-![Image 3](/images/data_augmentation/data_augmentation_example_1.png?raw=true "Image 1")
-![Image 4](/images/data_augmentation/data_augmentation_example_2.png?raw=true "Image 1")
-![Image 5](/images/data_augmentation/data_augmentation_example_3.png?raw=true "Image 1")
-![Image 6](/images/data_augmentation/data_augmentation_example_4.png?raw=true "Image 1")
+![Image 3](/images/data_augmentation/data_augmentation_example_1.png?raw=true "Image 3")
+![Image 4](/images/data_augmentation/data_augmentation_example_2.png?raw=true "Image 4")
+![Image 5](/images/data_augmentation/data_augmentation_example_3.png?raw=true "Image 5")
+![Image 6](/images/data_augmentation/data_augmentation_example_4.png?raw=true "Image 6")
