@@ -17,7 +17,7 @@ from torch.utils.data import DataLoader
 
 from model import Net
 from dataset import PokemonSprites
-from utils import add_variable_gaussian_noise
+from utils import add_variable_gaussian_noise, augment_data
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -51,7 +51,8 @@ def train(args):
             "architecture": "ConvAutoEncoder",
             "dataset": "PokemonSprites",
             "epochs": args.epochs,
-            "noise": args.noise
+            "noise": args.noise,
+            "data_augmentation_factor": args.data_augmentation_factor
             }
     )
 
@@ -60,6 +61,7 @@ def train(args):
         net.train()
         for batch_idx, images in enumerate(train_loader, 1):
             images = images.to(device)
+            images = augment_data(images, args.data_augmentation_factor)
             noisy_images = add_variable_gaussian_noise(images, args.noise)
             output = net(noisy_images)
             loss = loss_fn(output, images)
@@ -146,6 +148,13 @@ def parse_args():
         default=0.001,
         metavar="LR",
         help="learning rate (default: 0.01)",
+    )
+    parser.add_argument(
+        "--data-augmentation-factor",
+        type=int,
+        default=4,
+        metavar="daf",
+        help="How much the images are stretch during data augmentation",
     )
     parser.add_argument(
         "--noise",

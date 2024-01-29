@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 
 def add_variable_gaussian_noise(tensor, noise_proportion):
     std = torch.std(tensor)
@@ -7,5 +8,35 @@ def add_variable_gaussian_noise(tensor, noise_proportion):
     return noisy_tensor
 
 
-def augment_data(tensor):
-    pass
+def augment_data(batch, l_max=4):
+    h, w = batch.shape[-2], batch.shape[-1]
+    ih = np.random.randint(h)
+    iw = np.random.randint(w)
+    l = np.random.randint(1, l_max)
+    flip = np.random.choice([True, False])
+    orientation = np.random.choice([1, 2, 3, 4])
+
+    if flip:
+        batch = batch.flip(dims=[3])
+
+    if orientation == 1:
+        col = batch[:, :, :, iw:iw+1]
+        batch = torch.cat([batch[:, :, :, :iw]] + l * [col] +[batch[:, :, :, iw:]], dim=3)
+        batch = batch[:, :, :, :-l]
+
+    elif orientation == 2:
+        col = batch[:, :, :, iw:iw+1]
+        batch = torch.cat([batch[:, :, :, :iw+1]] + l * [col] + [batch[:, :, :, iw+1:]], dim=3)
+        batch = batch[:, :, :, l:]
+
+    elif orientation == 3:
+        row = batch[:, :, ih:ih+1, :]
+        batch = torch.cat([batch[:, :, :ih, :]] + l * [row] +[batch[:, :, ih:, :]], dim=2)
+        batch = batch[:, :, :-l, :]
+
+    elif orientation == 4:
+        row = batch[:, :, ih:ih+1, :]
+        batch = torch.cat([batch[:, :, :ih+1, :]] + l * [row] + [batch[:, :, ih+1:, :]], dim=2)
+        batch = batch[:, :, l:, :]
+
+    return batch

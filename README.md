@@ -2,6 +2,16 @@
 
 # Pokemon Visual Transformer Diffusion
 
+This is a transformer based model trained for denoising task on pokémon sprites dataset from first generation.
+The goal is to produce new and original sprites while keeping a coherent style.
+This is still a work in progress project.
+
+# Best results for now
+
+![Image 1](/images/results/1.png?raw=true "Image 1")
+![Image 2](/images/results/2.png?raw=true "Image 2")
+
+
 ## How tu use it
 
 ``` bash
@@ -37,16 +47,21 @@ Look into outputs directory
 
 Save Model with model card
 
-Load more data from all three sources
+Add images of diffusion into WandB
 
-Data Augmentation
+Load more data from all three sources
 
 Early stopping and checkpoints
 
 Regularization
 
-# Best results for now
+Add possiblity to launch training and quit, leaving the model training online
 
-![Image 1](/results/1.png?raw=true "Image 1")
-![Image 2](/results/2.png?raw=true "Image 2")
+# Data augmentation
 
+Here are exemples of data augmentation done to ensure better robustness of the model.
+
+![Image 3](/images/data_augmentation/data_augmentation_example_1.png?raw=true "Image 1")
+![Image 4](/images/data_augmentation/data_augmentation_example_2.png?raw=true "Image 1")
+![Image 5](/images/data_augmentation/data_augmentation_example_3.png?raw=true "Image 1")
+![Image 6](/images/data_augmentation/data_augmentation_example_4.png?raw=true "Image 1")

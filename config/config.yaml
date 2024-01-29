@@ -9,3 +9,4 @@ batch-size: 16
 log-interval: 1
 
 noise: 0.05
+data-augmentation-factor: 4
