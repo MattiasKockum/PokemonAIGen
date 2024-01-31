@@ -35,8 +35,6 @@ python prepare_data.py
 python launch_training.py
 ```
 
-Fill the .env file with your pt_mnist_model_data
-
 ``` bash
 python deploy.py
 ```
@@ -45,17 +43,11 @@ Look into outputs directory
 
 # TODO
 
-Add images of diffusion into WandB
-
-Load more data from all three sources
-
-Save Model with model card
-
-Early stopping and checkpoints
+Early stopping
 
 Regularization
 
-Add possiblity to launch training and quit, leaving the model training online
+Add color (multiple channels)
 
 # Data augmentation
 

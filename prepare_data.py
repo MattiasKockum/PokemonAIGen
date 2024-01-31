@@ -72,9 +72,17 @@ def create_tar_gz(images, output_path):
             gz_file.write(tar_buffer.read())
 
 
-images_file_pattern = 'pokemon/main-sprites/red-blue/gray'
 archive_path = "data/generation-1.tar.gz"
-images = read_images_from_tar_gz(archive_path, images_file_pattern)
+
+images_file_patterns = [
+    'pokemon/main-sprites/red-blue/gray',
+    'pokemon/main-sprites/yellow/gray'
+]
+
+images = []
+for images_file_pattern in images_file_patterns:
+    images += read_images_from_tar_gz(archive_path, images_file_pattern)
+
 images = resize_images(images)
 np.random.shuffle(images)
 

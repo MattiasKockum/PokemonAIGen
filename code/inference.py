@@ -15,17 +15,14 @@ def model_fn(model_dir):
 
 def input_fn(request_body, request_content_type):
     assert request_content_type=='application/json'
-    x = json.loads(request_body)['x']
-    y = json.loads(request_body)['y']
-    data = torch.rand((1, x, y))
-    return data
+    return None
 
 def predict_fn(input_object, model):
+    data = torch.rand((model.channels, *model.image_size))
     with torch.no_grad():
-        prediction = input_object
-        for i in range(int(1 / model.noise)):
-            prediction = model(prediction)
-    return prediction
+        for _ in range(model.denoising_steps):
+            data = model(data)
+    return data
 
 def output_fn(predictions, content_type):
     assert content_type == 'application/json'

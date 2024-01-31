@@ -15,7 +15,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-from model import Net
+from model import Net, save_model
 from dataset import PokemonSprites
 from utils import add_variable_gaussian_noise, augment_data
 
@@ -44,20 +44,24 @@ def train(args):
         net.parameters(), betas=(args.beta_1, args.beta_2), weight_decay=args.weight_decay
     )
 
+    config={
+        "learning_rate": args.learning_rate,
+        "architecture": "DiffusionVisionTransformerModel",
+        "dataset": "PokemonSprites",
+        "epochs": args.epochs,
+        "denoising-steps": args.denoising_steps,
+        "data_augmentation_factor": args.data_augmentation_factor
+        }
+
     wandb.init(
         project="PokemonSprites",
-        config={
-            "learning_rate": args.learning_rate,
-            "architecture": "ConvAutoEncoder",
-            "dataset": "PokemonSprites",
-            "epochs": args.epochs,
-            "denoising-steps": args.denoising_steps,
-            "data_augmentation_factor": args.data_augmentation_factor
-            }
+        config=config
     )
 
     logger.info("Start training ...")
     for epoch in range(1, args.epochs + 1):
+        config["current-epoch"] = epoch
+        config["current-learning-rate"] = args.learning_rate
         net.train()
         for batch_idx, images in enumerate(train_loader, 1):
             images = images.to(device)
@@ -71,18 +75,20 @@ def train(args):
             optimizer.step()
 
             if batch_idx % args.log_interval == 0:
-                log(loss, epoch, batch_idx, images, train_loader)
+                train_log(loss, epoch, batch_idx, images, train_loader)
 
         # test the model
         test(net, test_loader, device, loss_fn, args)
+        if epoch % args.checkpoint_interval == 0:
+            save_model(net, config, f"{args.model_dir}/checkpoint_model_{epoch}.pth")
 
     # save model checkpoint
-    save_model(net, args.model_dir)
+    save_model(net, config, f"{args.model_dir}/final_model_{epoch}.pth")
     wandb.finish()
     return
 
 
-def log(loss, epoch, batch_idx, imgs, train_loader):
+def train_log(loss, epoch, batch_idx, imgs, train_loader):
     wandb.log({"loss": loss.item(), "epoch": epoch})
     print(
         "Train Epoch: {} [{}/{} ({:.0f}%)] Loss: {:.6f}".format(
@@ -93,6 +99,32 @@ def log(loss, epoch, batch_idx, imgs, train_loader):
             loss.item(),
         )
     )
+    return
+
+
+def diffusion(model, batch_size=4):
+    noise = torch.rand((batch_size, model.channels, *model.image_size))
+    L = [noise]
+    with torch.no_grad():
+        for _ in range(model.denoising_steps):
+            L.append(model(L[-1]))
+    return L
+
+
+def test_log(model, test_loss):
+    exemple_images = diffusion(model)
+    exemple_images = [batch.unsqueeze(0) for batch in exemple_images]
+    exemple_images = torch.cat(exemple_images)
+    exemple_images = exemple_images.squeeze(2)  # Removing channels
+    exemple_images = exemple_images.permute(1, 0, 2, 3)
+    exemple_images = [torch.cat(list(l), dim=1) for l in list(exemple_images)]
+    exemple_images = torch.cat(exemple_images)
+    exemple_images = wandb.Image(exemple_images, caption="Diffusion trail")
+    wandb.log({
+        "test": test_loss,
+        "inference-exemples": exemple_images
+    })
+    return
 
 
 def test(model, test_loader, device, loss_fn, args):
@@ -107,18 +139,10 @@ def test(model, test_loader, device, loss_fn, args):
 
 
     test_loss /= len(test_loader.dataset)
-    wandb.log({"test": test_loss})
-    logger.info(
-        "Test set: Average loss: {:.4f}\n".format(test_loss)
-    )
+    test_log(model, test_loss)
+    logger.info("Test set: Average loss: {:.4f}\n".format(test_loss))
     return
 
-
-def save_model(model, model_dir):
-    logger.info("Saving the model")
-    path = os.path.join(model_dir, "model.pth")
-    torch.save(model.cpu().state_dict(), path)
-    return
 
 
 def parse_args():
@@ -158,8 +182,8 @@ def parse_args():
     )
     parser.add_argument(
         "--denoising-steps",
-        type=float,
-        default=0.2,
+        type=int,
+        default=20,
         metavar="no",
         help="How much denoising steps the model is trained to do",
     )
@@ -183,6 +207,13 @@ def parse_args():
         default=100,
         metavar="N",
         help="how many batches to wait before logging training status",
+    )
+    parser.add_argument(
+        "--checkpoint-interval",
+        type=int,
+        default=100,
+        metavar="CI",
+        help="how many epochs to wait before saving the model",
     )
     parser.add_argument(
         "--backend",

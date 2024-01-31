@@ -1,3 +1,5 @@
+import os
+import torch
 import torch.nn as nn
 
 class Net(nn.Module):
@@ -21,3 +23,30 @@ class Net(nn.Module):
         x = x.view(x.size(0), -1, self.image_size[0], self.image_size[1])
         return x
 
+
+def save_model(model, info, path):
+    model_card = {
+        "image_size": model.image_size,
+        "channels":model.channels,
+        "denoising_steps": model.denoising_steps,
+        "model_dict": model.state_dict()
+    }
+    model_card = {**model_card, **info}
+    torch.save(model_card, path)
+    return model_card
+
+
+def load_model(path):
+
+    with open(path, "rb") as f:
+        info_dict = torch.load(f)
+
+    image_size = info_dict["image_size"]
+    channels = info_dict["channels"]
+    denoising_steps = info_dict["denoising_steps"]
+    model_dict = info_dict["model_dict"]
+
+    model = Net(image_size, channels, denoising_steps)
+    model.load_state_dict(model_dict)
+
+    return model, model_dict

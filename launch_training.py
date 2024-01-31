@@ -1,4 +1,5 @@
 import os
+import time
 from dotenv import load_dotenv
 import yaml
 
@@ -12,12 +13,13 @@ load_dotenv()
 with open('config/config.yaml', 'r') as file:
     config = yaml.safe_load(file)
 
-
 sess = sagemaker.Session()
 
 role = os.getenv("role")
 
 prefix = config["prefix"]
+
+wait = config["wait"]
 
 bucket = sess.default_bucket()
 
@@ -44,23 +46,36 @@ estimator = PyTorch(
         "learning-rate": config["learning-rate"],
         "denoising-steps": config["denoising-steps"],
         "data-augmentation-factor": config["data-augmentation-factor"],
-        "log-interval": config["log-interval"]},
+        "log-interval": config["log-interval"],
+        "checkpoint-interval": config["checkpoint-interval"]
+        },
     environment={"WANDB_API_KEY": os.getenv("wandb_api_key")}
     )
-estimator.fit(inputs=channels)
+estimator.fit(inputs=channels, wait=wait)
 
-pt_mnist_model_data = estimator.model_data
+print("From now on the local machine can be disconnected")
 
-with open('config/save_last_model.yaml', 'w') as file:
-    yaml.dump({"last-trained-model": pt_mnist_model_data}, file)
+job_name = estimator.latest_training_job.name
+while True:
+    logs = sess.logs_for_job(job_name, wait=True)
+    print(logs)
+    if 'Training job completed' in logs:
+        break
+    time.sleep(10)
+
 
 download_trained_model = False
 
-if download_trained_model:
-    if not os.path.exists("models"):
-        os.makedirs("models")
-    s3 = boto3.client("s3")
-    l = pt_mnist_model_data.split('/')
-    key = '/'.join(l[3:])
-    dest = "models/" + l[-1]
-    s3.download_file(bucket, key, dest)
+if wait:
+    pt_mnist_model_data = estimator.model_data
+    with open('config/save_last_model.yaml', 'w') as file:
+        yaml.dump({"last-trained-model": pt_mnist_model_data}, file)
+
+    if download_trained_model:
+        if not os.path.exists("models"):
+            os.makedirs("models")
+        s3 = boto3.client("s3")
+        l = pt_mnist_model_data.split('/')
+        key = '/'.join(l[3:])
+        dest = "models/" + l[-1]
+        s3.download_file(bucket, key, dest)
