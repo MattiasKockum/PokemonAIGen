@@ -45,7 +45,7 @@ estimator = PyTorch(
         "epochs": config["epochs"],
         "learning-rate": config["learning-rate"],
         "denoising-steps": config["denoising-steps"],
-        "data-augmentation-factor": config["data-augmentation-factor"],
+        "distortion-factor": config["distortion-factor"],
         "log-interval": config["log-interval"],
         "checkpoint-interval": config["checkpoint-interval"]
         },
@@ -53,10 +53,16 @@ estimator = PyTorch(
     )
 estimator.fit(inputs=channels, wait=wait)
 
-print("From now on the local machine can be disconnected")
-
 job_name = estimator.latest_training_job.name
-while True:
+
+with open('config/save_last_model.yaml', 'w') as file:
+    yaml.dump({"last-job-name": job_name}, file)
+
+print("\nFrom now on the local machine can be disconnected\n")
+print("\nKeep up with the training on Weights&Biases\n")
+
+follow = False
+while follow:
     logs = sess.logs_for_job(job_name, wait=True)
     print(logs)
     if 'Training job completed' in logs:
@@ -64,13 +70,10 @@ while True:
     time.sleep(10)
 
 
-download_trained_model = False
+download_trained_model = True
 
 if wait:
     pt_mnist_model_data = estimator.model_data
-    with open('config/save_last_model.yaml', 'w') as file:
-        yaml.dump({"last-trained-model": pt_mnist_model_data}, file)
-
     if download_trained_model:
         if not os.path.exists("models"):
             os.makedirs("models")

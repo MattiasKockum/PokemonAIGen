@@ -3,3 +3,4 @@ python-dotenv
 sagemaker
 torch
 pytest
+gradio

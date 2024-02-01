@@ -7,8 +7,12 @@ venv/*
 # pycache
 **/__pycache__/
 
+# gradio
+flagged/*
+
 # Some config
 config/save_last_model.yaml
+config/gradio.yaml
 
 # AI data
 data/*

@@ -43,6 +43,12 @@ Look into outputs directory
 
 # TODO
 
+Normalize test and train loss
+
+Add sliding into data augmentation
+
+Make the noise always the same on testing !
+
 Early stopping
 
 Regularization

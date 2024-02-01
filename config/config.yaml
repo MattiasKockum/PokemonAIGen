@@ -10,7 +10,9 @@ learning-rate: 0.001
 batch-size: 16
 
 log-interval: 1
-checkpoint-interval: 10
+checkpoint-interval: 500
 
 denoising-steps: 20
-data-augmentation-factor: 2
+distortion-factor: 3
+sliding-factor: 3
+

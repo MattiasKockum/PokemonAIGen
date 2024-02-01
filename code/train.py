@@ -50,7 +50,7 @@ def train(args):
         "dataset": "PokemonSprites",
         "epochs": args.epochs,
         "denoising-steps": args.denoising_steps,
-        "data_augmentation_factor": args.data_augmentation_factor
+        "distortion-factor": args.distortion_factor
         }
 
     wandb.init(
@@ -65,7 +65,7 @@ def train(args):
         net.train()
         for batch_idx, images in enumerate(train_loader, 1):
             images = images.to(device)
-            images = augment_data(images, args.data_augmentation_factor)
+            images = augment_data(images, args)
             noisy_images = add_variable_gaussian_noise(images, 1 / args.denoising_steps)
             output = net(noisy_images)
             loss = loss_fn(output, images)
@@ -174,7 +174,7 @@ def parse_args():
         help="learning rate (default: 0.01)",
     )
     parser.add_argument(
-        "--data-augmentation-factor",
+        "--distortion-factor",
         type=int,
         default=4,
         metavar="daf",
